@@ -8,6 +8,7 @@ CRON_FREQUENCY="@hourly"
 CONFIG_FILE="$HOME/.zonomi.conf"
 ZONOMI_BASE="https://zonomi.com"
 ZONOMI_TEST_API_URL="$ZONOMI_BASE/app/dns/dyndns.jsp?action=QUERYZONES&api_key"
+HOSTNAME=`hostname -s | tr '[:upper:]' '[:lower:]'`
 
 echo "-> Checking Internet Connetion"
 if ! curl -sSf "$ZONOMI_BASE" -o /dev/null; then
@@ -93,8 +94,20 @@ else
   fi
 fi
 
+SUBDOMAIN=${SUBDOMAIN:-$HOSTNAME}
+
+read -p "Enter Subdomain [$SUBDOMAIN]: " SUB_DOMAIN
+SUB_DOMAIN=${SUB_DOMAIN:-$SUBDOMAIN}
+if [[ "$SUB_DOMAIN" == "" ]]; then
+  error "Subdomain cannot be blank!"
+  exit 1
+fi
+
 echo "API_KEY=\"$KEY\"" > "$CONFIG_FILE"
 echo "DOMAIN=\"$PARENT_DOMAIN\"" >> "$CONFIG_FILE"
+if [[ "$SUB_DOMAIN" != "" ]]; then
+  echo "SUBDOMAIN=\"$SUB_DOMAIN\"" >> "$CONFIG_FILE"
+fi
 echo "Values saved into config file $CONFIG_FILE"
 
 # Set the repo url or if empty use the default
@@ -126,9 +139,7 @@ CRON_JOB="$CRON_FREQUENCY $UPDATE_SCRIPT -c $CONFIG_FILE"
 cron_installed=`crontab -l 2>/dev/null| grep -q "^$CRON_JOB$"; echo $?`
 crontab_exists=`crontab -l 2>/dev/null; echo $?`
 
-echo $cron_installed
-
-if [ $cron_installed -eq 0 ]; then
+if [ $cron_installed -eq 1 ]; then
     if [ $(confirm "Would you like to install the update script into crontab for automated updating? [Y/n]"; echo $?) -eq 0 ]; then
         # Add to crontab with no duplication
         ( crontab -l | grep -v "$CRON_JOB"; echo "$CRON_JOB" ) | crontab -
@@ -150,3 +161,8 @@ if [ -w "/usr/local/bin/update-zonomi" ] && [ `stat -c %U "/usr/local/bin"` == "
   ln -sfn "$UPDATE_SCRIPT" "/usr/local/bin/update-zonomi"
   echo "-> Updated symlink location"
 fi
+
+echo "Zonomi DNS Updater is now installed!"
+echo
+
+exit 0
