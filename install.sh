@@ -1,21 +1,15 @@
 #!/bin/bash
 
-REPO_URL="https://github.com/hongkongkiwi/ZonomiDNSUpdater"
+REPO_URL="https://raw.githubusercontent.com/hongkongkiwi/Zonomi-DNS-Updator/master/"
 REPO_UPDATE_SCRIPT="$REPO_URL/master/update.sh"
 REPO_LOGGER_LIB="$REPO_URL/master/libs/task-logger/task-logger.sh"
-UPDATE_SCRIPT="$HOME/ZonomiAutoUpdate/update_zonomi.sh"
-CONNECT_TEST_URL="https://www.github.com"
+UPDATE_SCRIPT="$HOME/Zonomi-DNS-Updator/update_zonomi.sh"
 CRON_FREQUENCY="@hourly"
 CONFIG_FILE="$HOME/.zonomi.conf"
 ZONOMI_BASE="https://zonomi.com"
 ZONOMI_TEST_API_URL="$ZONOMI_BASE/app/dns/dyndns.jsp?action=QUERYZONES&api_key"
 
 echo "-> Checking Internet Connetion"
-if ! curl -sSf "$CONNECT_TEST_URL" > /dev/null; then
-  echo "ERROR: We cannot access $CONNECT_TEST_URL"
-  echo "       Please check your internet connection"
-  exit 255
-fi
 if ! curl -sSf "$ZONOMI_BASE" > /dev/null; then
   echo "ERROR: We cannot access $ZONOMI_BASE"
   echo "       Please check your internet connection"
