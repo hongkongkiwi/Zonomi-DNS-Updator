@@ -2,7 +2,7 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 DEFAULT_CONFIG_FILE="$DIR/config"
-HOSTNAME=`hostname | tr '[:upper:]' '[:lower:]'`
+HOSTNAME=`hostname -s | tr '[:upper:]' '[:lower:]'`
 
 # Read the config file (if it exists)
 if [ -f "$DEFAULT_CONFIG_FILE" ]; then

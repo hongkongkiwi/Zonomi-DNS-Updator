@@ -1,7 +1,7 @@
 #!/bin/bash
 
-REPO_URL="https://raw.githubusercontent.com/hongkongkiwi/Zonomi-DNS-Updator/master/"
-REPO_UPDATE_SCRIPT="$REPO_URL/master/update.sh"
+REPO_URL="https://raw.githubusercontent.com/hongkongkiwi/Zonomi-DNS-Updator/master"
+REPO_UPDATE_SCRIPT="$REPO_URL/update_zonomi.sh"
 REPO_LOGGER_LIB="$REPO_URL/master/libs/task-logger/task-logger.sh"
 UPDATE_SCRIPT="$HOME/Zonomi-DNS-Updator/update_zonomi.sh"
 CRON_FREQUENCY="@hourly"
@@ -10,7 +10,7 @@ ZONOMI_BASE="https://zonomi.com"
 ZONOMI_TEST_API_URL="$ZONOMI_BASE/app/dns/dyndns.jsp?action=QUERYZONES&api_key"
 
 echo "-> Checking Internet Connetion"
-if ! curl -sSf "$ZONOMI_BASE" > /dev/null; then
+if ! curl -sSf "$ZONOMI_BASE" -o /dev/null; then
   echo "ERROR: We cannot access $ZONOMI_BASE"
   echo "       Please check your internet connection"
   exit 255
@@ -113,8 +113,7 @@ UPDATE_SCRIPT="$SCRIPT_DIR/$SCRIPT_NAME"
 if [ ! -f "$UPDATE_SCRIPT" ]; then
   # Download update script
   echo "-> Downloading Update Script"
-  #wget -O "$UPDATE_SCRIPT" "$REPO_UPDATE_SCRIPT"
-  echo "wget $REPO_UPDATE_SCRIPT"
+  wget --quiet -O "$UPDATE_SCRIPT" "$REPO_UPDATE_SCRIPT"
   if [ ! -f "$UPDATE_SCRIPT" ]; then
     echo "X> Cannot find update script"
     exit 255
@@ -127,7 +126,9 @@ CRON_JOB="$CRON_FREQUENCY $UPDATE_SCRIPT -c $CONFIG_FILE"
 cron_installed=`crontab -l 2>/dev/null| grep -q "^$CRON_JOB$"; echo $?`
 crontab_exists=`crontab -l 2>/dev/null; echo $?`
 
-if [ $cron_installed -ne 0 ]; then
+echo $cron_installed
+
+if [ $cron_installed -eq 0 ]; then
     if [ $(confirm "Would you like to install the update script into crontab for automated updating? [Y/n]"; echo $?) -eq 0 ]; then
         # Add to crontab with no duplication
         ( crontab -l | grep -v "$CRON_JOB"; echo "$CRON_JOB" ) | crontab -
